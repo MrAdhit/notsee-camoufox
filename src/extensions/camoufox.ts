@@ -9,7 +9,7 @@ export async function ExtendedCamoufox<
 >(
     launch_options:
         | LaunchOptions
-        | { headless?: boolean | "virtual"; user_data_dir: UserDataDir } = { humanize: true, screen: { maxHeight: 768, maxWidth: 1366 } },
+        | { headless?: boolean | "virtual"; user_data_dir: UserDataDir } = { humanize: .5, screen: { maxHeight: 768, maxWidth: 1366 } },
 ): Promise<ReturnType> {
     const browser = await Camoufox(launch_options);
     
