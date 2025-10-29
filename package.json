@@ -13,7 +13,8 @@
     "test:ui": "vitest --ui",
     "test:watch": "vitest watch",
     "demo:build": "cd demo && pnpm install && pnpm run build",
-    "demo:start": "node ./demo/dist/index.js"
+    "demo:start": "node ./demo/dist/index.js",
+    "prepare": "pnpm build"
   },
   "keywords": [],
   "author": "MrAdhit",
