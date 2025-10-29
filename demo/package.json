@@ -1,0 +1,22 @@
+{
+  "name": "notsee-camoufox-demo",
+  "version": "1.0.0",
+  "description": "Demo project for notsee-camoufox",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "cd .. && pnpm build && cd demo && node esbuild.config.js",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "keywords": [],
+  "author": "MrAdhit",
+  "devDependencies": {
+    "esbuild": "^0.25.11",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "@types/node": "^24.9.1",
+    "notsee-camoufox": "link:.."
+  }
+}
