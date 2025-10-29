@@ -8,7 +8,7 @@ async function enterToExit() {
         output: process.stdout
     });
 
-    await rl.question("Press Enter to continue...");
+    await rl.question("Press Enter to exit...");
     
     process.exit(0);
 }
@@ -23,18 +23,18 @@ async function enterToExit() {
 
     await page.goto("https://formsmarts.com/html-form-example");
 
-    await page.imageType(require("../assets/first_name.png"), "John");
-    await page.imageClick(require("../assets/payment_form.png"));
+    await page.image.type(require("../assets/first_name.png"), "John");
+    await page.image.click(require("../assets/payment_form.png"));
 
     await page.waitForTimeout(500);
     
     const [newPage] = await Promise.all([
         context.waitForEvent("page").then(p => new ExtendedPage(p)),
-        page.imageClick(require("../assets/try_booking_form.png"), { imageSearch: { threshold: 0.5 } }),
+        page.image.click(require("../assets/try_booking_form.png"), { search: { threshold: 0.5 } }),
     ]);
 
     await newPage.waitForLoadState();
-    await newPage.imageClick(require("../assets/1_year.png"), { imageSearch: { saveDebugImage: true } });
+    await newPage.image.click(require("../assets/1_year.png"), { search: { saveDebugImage: true } });
     
     await enterToExit();
 })();

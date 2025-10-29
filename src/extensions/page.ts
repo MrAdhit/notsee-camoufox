@@ -8,11 +8,22 @@ import { debugTimestamp } from "../utils/debug";
 
 export interface ExtendedPage extends Page {}
 export class ExtendedPage {
+    #proxy;
+
     constructor(private page: Page) {
-        return createProxyClass(this, this.page);
+        this.#proxy = createProxyClass(this, this.page);
+        return this.#proxy;
     }
     
-    async imageSearch(
+    get image() {
+        return new Image(this.#proxy);
+    }
+}
+
+class Image {
+    constructor(private page: ExtendedPage) {}
+    
+    async search(
         sourceImagePathOrBinary: Parameters<typeof readFile>[0] | Uint8Array<ArrayBuffer>,
         options?: {
             threshold?: number;
@@ -49,17 +60,17 @@ export class ExtendedPage {
         return result;
     }
     
-    async imageClick(
-        sourceImagePathOrBinary: Parameters<ExtendedPage["imageSearch"]>[0],
+    async click(
+        sourceImagePathOrBinary: Parameters<Image["search"]>[0],
         options?: {
-            imageSearch?: Parameters<ExtendedPage["imageSearch"]>[1];
+            search?: Parameters<Image["search"]>[1];
             mouse?: Parameters<ExtendedPage["mouse"]["click"]>[2];
             indexOf?: number;
         },
     ) {
         const indexOf = options?.indexOf ?? 0;
 
-        const results = await this.imageSearch(sourceImagePathOrBinary, options?.imageSearch);
+        const results = await this.search(sourceImagePathOrBinary, options?.search);
         const result = results[indexOf];
         
         if (result === undefined)
@@ -94,17 +105,17 @@ export class ExtendedPage {
         return result;
     }
     
-    async imageType(
-        sourceImagePathOrBinary: Parameters<ExtendedPage["imageSearch"]>[0],
+    async type(
+        sourceImagePathOrBinary: Parameters<Image["search"]>[0],
         text: string,
         options?: {
-            imageSearch?: Parameters<ExtendedPage["imageSearch"]>[1];
+            search?: Parameters<Image["search"]>[1];
             fill?: Parameters<Locator["fill"]>[1];
             indexOf?: number;
         },
     ) {
-        await this.imageClick(sourceImagePathOrBinary, options);
+        await this.click(sourceImagePathOrBinary, options);
         await this.page.waitForTimeout(100); // Small delay to ensure focus.
-        await this.keyboard.insertText(text);
+        await this.page.keyboard.insertText(text);
     }
 }
