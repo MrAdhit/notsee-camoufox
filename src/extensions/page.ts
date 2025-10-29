@@ -28,6 +28,7 @@ class Image {
         options?: {
             threshold?: number;
             saveDebugImage?: boolean;
+            timeout?: number;
         }
     ) {
         let sourceImage: Uint8Array;
@@ -41,7 +42,7 @@ class Image {
         const sourceImageBase64 = Buffer.from(sourceImage).toString("base64");
         
         const screenshot = await this.page.screenshot({ type: "png", fullPage: true });
-        const screenshotBase64 = Buffer.from(screenshot).toString("base64");
+        let screenshotBase64 = Buffer.from(screenshot).toString("base64");
         
         if (options?.saveDebugImage) {
             const timestamp = debugTimestamp();
@@ -54,10 +55,30 @@ class Image {
             ]);
         }
         
-        // TODO: Request to Python to mark the found locations on the screenshot and save the resulting image with bunch of squares.
-        const result = await imageSearch(sourceImageBase64, screenshotBase64, options?.threshold ?? 0.8);
+        const startTime = Date.now();
+        let tries = 0;
         
-        return result;
+        while ((Date.now() - startTime) < (options?.timeout ?? 30000)) {
+            tries += 1;
+            await this.page.waitForTimeout(1000);
+
+            const screenshot = await this.page.screenshot({ type: "png", fullPage: true });
+            screenshotBase64 = Buffer.from(screenshot).toString("base64");
+            
+            if (options?.saveDebugImage) {
+                const timestamp = debugTimestamp();
+
+                writeFile(`debug/image_search/screenshot_try${tries}_${timestamp}.png`, screenshot)
+            }
+
+            // TODO: Request to Python to mark the found locations on the screenshot and save the resulting image with bunch of squares.
+            const result = await imageSearch(sourceImageBase64, screenshotBase64, options?.threshold ?? 0.8);
+            if (result.length === 0) continue;
+
+            return result;
+        }
+        
+        throw new Error("No matching image found.");
     }
     
     async click(
