@@ -14,6 +14,7 @@ build({
     loader: {
         ".py": "copy",
     },
+    external: ["playwright-core"],
     sourcemap: true,
     plugins: [
         NodeResolvePlugin({
