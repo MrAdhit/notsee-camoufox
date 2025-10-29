@@ -34,7 +34,12 @@ let proc: ReturnType<typeof spawn> | null = null;
  * const matches = await imageSearch(templateBase64, screenshotBase64, 0.85);
  * // Returns: [{ point: [100, 200], confidence: 0.92 }, ...]
  */
-export async function imageSearch(template_base64: string, screenshot_base64: string, threshold: number = 0.8): Promise<z.infer<typeof Result>> {
+export async function imageSearch(
+    template_base64: string,
+    screenshot_base64: string,
+    threshold: number = 0.8,
+    cannyMode: boolean = false,
+): Promise<z.infer<typeof Result>> {
     return new Promise((resolve, reject) => {
         let errorData = "";
 
@@ -75,5 +80,6 @@ export async function imageSearch(template_base64: string, screenshot_base64: st
         proc.stdin!.write(screenshot_base64 + "\n");
         proc.stdin!.write(template_base64 + "\n");
         proc.stdin!.write(threshold.toString() + "\n");
+        proc.stdin!.write((cannyMode ? "true" : "false") + "\n");
     });
 }

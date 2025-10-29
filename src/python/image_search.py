@@ -102,9 +102,12 @@ def tpl_match(img_rgb, tmpl, thresh=0.8, pyramid_levels=4):
     
     return matches
 
-def image_search(screenshot_base64: str, template_base64: str, threshold: float = 0.8):
+def image_search(screenshot_base64: str, template_base64: str, threshold: float = 0.8, canny_mode: bool = False):
     screenshot = base64.b64decode(screenshot_base64)
     screenshot_cv = cv2.imdecode(np.asarray(bytearray(screenshot), dtype=np.uint8), cv2.IMREAD_COLOR)
+    if canny_mode:
+        screenshot_cv = cv2.Canny(screenshot_cv, 500, 1000)
+        screenshot_cv = cv2.cvtColor(screenshot_cv, cv2.COLOR_GRAY2BGR)
     
     template = base64.b64decode(template_base64)
     template_cv = cv2.imdecode(np.asarray(bytearray(template), dtype=np.uint8), cv2.IMREAD_COLOR)
@@ -132,7 +135,8 @@ while True:
     screenshot_base64 = input()
     template_base64 = input()
     threshold = float(input())
+    canny_mode = input().strip().lower() == "true"
 
-    data = image_search(screenshot_base64, template_base64, threshold)
+    data = image_search(screenshot_base64, template_base64, threshold, canny_mode)
 
     print(json.dumps(data))

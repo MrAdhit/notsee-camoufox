@@ -29,6 +29,8 @@ class Image {
             threshold?: number;
             saveDebugImage?: boolean;
             timeout?: number;
+            elementToCapture?: Locator;
+            cannyMode?: boolean;
         }
     ) {
         let sourceImage: Uint8Array;
@@ -41,7 +43,12 @@ class Image {
         
         const sourceImageBase64 = Buffer.from(sourceImage).toString("base64");
         
-        const screenshot = await this.page.screenshot({ type: "png", fullPage: true });
+        const findScreenshot = async () =>
+            options?.elementToCapture
+                ? await options.elementToCapture.screenshot({ type: "png" })
+                : await this.page.screenshot({ type: "png", fullPage: true });
+        
+        const screenshot = await findScreenshot();
         let screenshotBase64 = Buffer.from(screenshot).toString("base64");
         
         if (options?.saveDebugImage) {
@@ -62,17 +69,17 @@ class Image {
             tries += 1;
             await this.page.waitForTimeout(1000);
 
-            const screenshot = await this.page.screenshot({ type: "png", fullPage: true });
+            const screenshot = await findScreenshot();
             screenshotBase64 = Buffer.from(screenshot).toString("base64");
             
             if (options?.saveDebugImage) {
                 const timestamp = debugTimestamp();
 
-                writeFile(`debug/image_search/screenshot_try${tries}_${timestamp}.png`, screenshot)
+                writeFile(`debug/image_search/screenshot_try${tries}_${timestamp}.png`, screenshot);
             }
 
             // TODO: Request to Python to mark the found locations on the screenshot and save the resulting image with bunch of squares.
-            const result = await imageSearch(sourceImageBase64, screenshotBase64, options?.threshold ?? 0.8);
+            const result = await imageSearch(sourceImageBase64, screenshotBase64, options?.threshold, options?.cannyMode);
             if (result.length === 0) continue;
 
             return result;
